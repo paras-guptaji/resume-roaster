@@ -1,151 +1,219 @@
 
 
-AI Resume Roaster 🔥
+# Add PDF/DOC File Upload with Text Extraction
+
+Add the ability to upload PDF or DOCX files alongside the existing paste text option, with automatic text extraction.
+
+---
+
+## Overview
 
-A playful, colorful AI-powered resume analyzer that roasts, scores, and transforms resumes into interview-ready documents.
+Currently, users can only paste resume text manually. This plan adds:
+- Tab-based input switching (Paste Text / Upload File)
+- Drag-and-drop file upload zone
+- Server-side PDF and DOCX text extraction
+- Loading state during extraction
+- Error handling for unsupported files
 
-Phase 1: Core Experience
-1.1 Landing & Input Screen
+---
 
-Hero section with playful branding and tagline
-("Your resume is about to get roasted 🔥")
+## Implementation Approach
 
-Large text area to paste resume content
+### 1. Create File Upload Edge Function
 
-Role dropdown with expanded tech options:
+**New file: `supabase/functions/extract-resume/index.ts`**
+
+A dedicated edge function to handle file uploads and extract text:
+
+- Accept multipart/form-data with file upload
+- Detect file type (PDF vs DOCX)
+- **PDF extraction**: Use `pdfjs-serverless` library (designed for Deno/serverless)
+- **DOCX extraction**: Use `mammoth` library to convert DOCX to text
+- Return extracted text to the frontend
+- Handle errors gracefully (corrupted files, unsupported formats)
+
+```text
+┌─────────────────────────────────────────────────────────┐
+│                   extract-resume                         │
+├─────────────────────────────────────────────────────────┤
+│  Input: FormData with file                              │
+│                                                         │
+│  1. Parse multipart form data                           │
+│  2. Detect file type (.pdf or .docx)                    │
+│  3. Extract text using appropriate library              │
+│  4. Return { text: "extracted content" }                │
+│                                                         │
+│  Supported: PDF, DOC, DOCX                              │
+│  Max size: 10MB                                         │
+└─────────────────────────────────────────────────────────┘
+```
+
+### 2. Update Resume Input Component
+
+**Modify: `src/components/ResumeInput.tsx`**
+
+Transform into a tabbed interface:
+
+```text
+┌─────────────────────────────────────────┐
+│  [📝 Paste Text]  [📄 Upload File]      │
+├─────────────────────────────────────────┤
+│                                         │
+│  Tab 1: Current textarea (unchanged)    │
+│                                         │
+│  Tab 2: Drag-and-drop zone              │
+│         - Visual drop area              │
+│         - File icon + instructions      │
+│         - Supported formats badge       │
+│         - Or click to browse            │
+│                                         │
+└─────────────────────────────────────────┘
+```
+
+**New features:**
+- Tabs component to switch input modes
+- Hidden file input with accept=".pdf,.doc,.docx"
+- Drag-and-drop support with visual feedback
+- File size validation (max 10MB)
+- Loading spinner during extraction
+- Success state showing extracted text preview
+- Clear button to remove uploaded file
+
+### 3. Create File Upload Hook
+
+**New file: `src/hooks/useFileExtraction.ts`**
+
+Custom hook to handle file upload logic:
+
+- `uploadAndExtract(file: File)` - sends file to edge function
+- `isExtracting` - loading state
+- `extractedText` - result text
+- `error` - error message
+- `reset()` - clear state
+
+### 4. Update Resume Form
+
+**Modify: `src/components/ResumeForm.tsx`**
+
+- Integrate file extraction with existing flow
+- When file is uploaded, extracted text populates the content state
+- User can still edit extracted text before submitting
+- Same validation applies (min 50 characters)
+
+### 5. Update Supabase Config
+
+**Modify: `supabase/config.toml`**
+
+Add the new edge function configuration:
+
+```toml
+[functions.extract-resume]
+verify_jwt = false
+```
+
+---
+
+## User Experience Flow
+
+```text
+User lands on page
+       │
+       ▼
+┌──────────────────────┐
+│ Choose input method  │
+├──────────────────────┤
+│ [Paste] or [Upload]  │
+└──────────────────────┘
+       │
+       ├── Paste Text ──► Types/pastes resume
+       │
+       └── Upload File
+              │
+              ▼
+       ┌──────────────────┐
+       │ Drag PDF/DOCX    │
+       │ or click browse  │
+       └──────────────────┘
+              │
+              ▼
+       ┌──────────────────┐
+       │ "Extracting..."  │
+       │ (loading state)  │
+       └──────────────────┘
+              │
+              ▼
+       ┌──────────────────┐
+       │ Text extracted!  │
+       │ Preview shown    │
+       │ [Edit] [Clear]   │
+       └──────────────────┘
+              │
+              ▼
+       Continue with role selection
+       and intensity slider...
+```
+
+---
+
+## Technical Details
+
+### PDF Extraction (pdfjs-serverless)
+
+```typescript
+import { getDocument } from 'https://esm.sh/pdfjs-serverless';
+
+const doc = await getDocument({ data: pdfBytes }).promise;
+let fullText = '';
+
+for (let i = 1; i <= doc.numPages; i++) {
+  const page = await doc.getPage(i);
+  const textContent = await page.getTextContent();
+  const pageText = textContent.items
+    .map((item: any) => item.str)
+    .join(' ');
+  fullText += pageText + '\n';
+}
+```
+
+### DOCX Extraction (mammoth)
+
+```typescript
+import mammoth from 'https://esm.sh/mammoth';
+
+const result = await mammoth.extractRawText({
+  arrayBuffer: docxBytes
+});
+const text = result.value;
+```
+
+### File Upload UI States
+
+| State | Visual |
+|-------|--------|
+| **Idle** | Dashed border, upload icon, "Drag & drop or click" |
+| **Drag over** | Highlighted border, pulsing animation |
+| **Uploading** | Spinner, "Extracting text from your resume..." |
+| **Success** | Green checkmark, file name, text preview, Clear button |
+| **Error** | Red border, error message, Retry button |
+
+---
+
+## Files to Create/Modify
+
+| File | Action | Purpose |
+|------|--------|---------|
+| `supabase/functions/extract-resume/index.ts` | Create | Text extraction edge function |
+| `src/hooks/useFileExtraction.ts` | Create | File upload hook |
+| `src/components/ResumeInput.tsx` | Modify | Add tabs + upload zone |
+| `src/components/ResumeForm.tsx` | Modify | Integrate extraction flow |
+| `supabase/config.toml` | Modify | Add function config |
+
+---
+
+## Validation & Constraints
+
+- **Max file size**: 10MB
+- **Supported formats**: PDF, DOC, DOCX
+- **Min extracted text**: 50 characters (same as paste)
+- **Error messages**: Clear, helpful text for each failure case
 
-Frontend Developer
-
-Backend Developer
-
-Full-Stack Developer
-
-AI/ML Engineer
-
-Data Analyst
-
-DevOps Engineer
-
-Product Manager
-
-Designer
-
-Roast intensity slider:
-Mild → Medium → Extra Crispy 🌶️
-
-1.2 Results Dashboard
-
-Structured output cards showing:
-
-🔥 The Roast
-
-Brutal (but adjustable) AI-generated roast based on selected intensity
-
-Written in recruiter voice with humor
-
-📊 Confidence Score (0–100)
-
-Visual meter/gauge
-
-Calculated from metrics usage, action verbs, clarity, and role alignment
-
-Below 60 = "Risky Resume" warning
-
-80+ = "Interview-Ready" badge
-
-❌ Why This Resume Gets Rejected
-
-Top 3 rejection reasons
-
-Written like a recruiter’s internal note
-
-Fear + clarity = action
-
-Phase 2: Deep Analysis Features
-2.1 ATS Keyword Injection
-
-Detects missing role-specific keywords
-
-Shows which keywords are missing for the selected role
-
-AI injects them naturally into fixed bullets
-
-2.2 Bullet Strength Meter
-
-Each resume bullet gets rated:
-
-❌ Weak
-
-⚠️ Average
-
-✅ Strong
-
-With a one-line fix suggestion per bullet
-
-2.3 Before vs After View
-
-Split-screen comparison
-
-Left: Original bullets
-
-Right: AI-fixed bullets with keywords injected
-
-Visual transformation users can immediately use
-
-Phase 3: Advanced Intelligence
-3.1 Resume Lie Detector 🕵️
-
-AI flags suspicious claims:
-
-Overclaimed skills without evidence
-
-Buzzword stuffing detection
-
-Unrealistic experience claims
-
-Example:
-
-“You list Docker but show zero deployment evidence.”
-
-3.2 Interview Questions Generator
-
-Based on THEIR resume, generates:
-
-5 questions an interviewer will likely ask
-
-Ideal answer frameworks for each
-
-Connects resume → interview prep directly
-
-Phase 4: Sharing & Export
-4.1 Utility Features
-
-Copy buttons on all fixed bullets and sections
-
-Export full report as formatted text
-
-Share results via a shareable link or image of the roast score
-
-Design Direction
-
-Playful & Colorful Theme
-
-Fun gradients (warm oranges, pinks, purples)
-
-Emoji integration throughout
-
-Light-hearted animations
-
-Brutal feedback presented in an approachable, fun UI
-
-Mobile-responsive for on-the-go roasting
-
-Technical Approach
-
-Built entirely using Lovable
-
-Lovable AI (Gemini 3 Flash) for all resume analysis
-
-Prompt-driven logic with structured outputs
-
-No external backend or custom infrastructure required
