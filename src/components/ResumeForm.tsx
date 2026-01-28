@@ -41,7 +41,7 @@ export function ResumeForm({ onSubmit, isLoading }: ResumeFormProps) {
             type="submit"
             size="lg"
             disabled={!isValid || isLoading}
-            className="w-full h-14 text-lg font-semibold bg-accent hover:bg-accent/90 transition-opacity disabled:opacity-50"
+            className="w-full h-14 text-lg font-semibold bg-primary hover:bg-primary/90 transition-opacity disabled:opacity-50"
           >
             {isLoading ? (
               <>
