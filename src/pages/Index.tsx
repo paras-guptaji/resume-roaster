@@ -41,7 +41,7 @@ const Index = () => {
 
         {/* Footer */}
         <footer className="mt-16 text-center text-sm text-muted-foreground">
-          <p>Built with 💜 by Paras</p>
+          <p>~ By Paras</p>
           <p className="mt-1">Your resume data is never stored. Privacy first! 🔒</p>
         </footer>
       </div>
