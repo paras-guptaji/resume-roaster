@@ -10,24 +10,29 @@ const corsHeaders = {
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 async function extractPdfText(pdfBytes: Uint8Array): Promise<string> {
-  console.log("Extracting text from PDF...");
+  console.log("Extracting text from PDF using pdfjs-serverless...");
   
-  // Use pdf-parse for Deno - a simpler approach
-  const { getDocument } = await import('https://esm.sh/pdfjs-dist@4.0.379/legacy/build/pdf.mjs');
+  // Import pdfjs-serverless and resolve the PDF.js module
+  const { resolvePDFJS } = await import('https://esm.sh/pdfjs-serverless@0.6.0');
+  const pdfjs = await resolvePDFJS();
   
-  const doc = await getDocument({ data: pdfBytes }).promise;
+  const doc = await pdfjs.getDocument(pdfBytes).promise;
   let fullText = '';
+  
+  console.log(`PDF has ${doc.numPages} pages`);
   
   for (let i = 1; i <= doc.numPages; i++) {
     const page = await doc.getPage(i);
     const textContent = await page.getTextContent();
+    // deno-lint-ignore no-explicit-any
     const pageText = textContent.items
+      .filter((item: any) => typeof item.str === 'string')
       .map((item: any) => item.str)
       .join(' ');
     fullText += pageText + '\n';
   }
   
-  console.log(`Extracted ${fullText.length} characters from ${doc.numPages} pages`);
+  console.log(`Extracted ${fullText.length} characters from PDF`);
   return fullText.trim();
 }
 
