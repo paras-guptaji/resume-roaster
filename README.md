@@ -1,73 +1,98 @@
-# Welcome to your Lovable project
+Resume Roaster 🔥📄
 
-## Project info
+Roast your resume with AI and get brutally honest feedback, smart suggestions, and a reality check before recruiters reject you in 6 seconds.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+🚀 Overview
 
-## How can I edit this code?
+Resume Roaster is an AI-powered web app that analyzes resumes and gives humorous yet useful feedback to help users improve their resumes. Upload your resume, let the AI roast it, and learn what actually needs fixing.
 
-There are several ways of editing your application.
+This project combines fun with practical resume analysis to make resume improvement less boring and more engaging.
 
-**Use Lovable**
+✨ Features
+📂 Upload resumes in PDF format
+🤖 AI-generated resume roast and feedback
+📊 Resume scoring system
+🧠 Suggestions for improving content and formatting
+⚡ Fast and interactive UI
+🎭 Fun and sarcastic roasting style
+📱 Responsive design
+🛠️ Tech Stack
+Frontend
+React.js
+Tailwind CSS
+JavaScript
+Backend
+Node.js / Express (edit if different)
+AI API Integration
+Other Tools
+PDF Parsing
+REST APIs
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
 
-Changes made via Lovable will be committed automatically to this repo.
+Resume Roaster Repository
 
-**Use your preferred IDE**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+📦 Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Clone the repository:
 
-Follow these steps:
+git clone https://github.com/paras-guptaji/resume-roaster.git
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Move into the project directory:
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+cd resume-roaster
 
-# Step 3: Install the necessary dependencies.
-npm i
+Install dependencies:
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+npm install
+
+Start the development server:
+
 npm run dev
-```
+📄 Usage
+Upload your resume in PDF format
+Click on Roast Me
+Wait for the AI to analyze your resume
+Get roasted 🔥
+Improve your resume using the suggestions
+🎯 Purpose of the Project
 
-**Edit a file directly in GitHub**
+Most people create resumes without understanding what recruiters actually notice. Resume Roaster aims to:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Make resume review more engaging
+Highlight weak resume sections
+Encourage better resume writing
+Help students and beginners improve their resumes
+⚠️ Disclaimer
 
-**Use GitHub Codespaces**
+This project is made for educational and entertainment purposes.
+The roasting style may be sarcastic or humorous, but the suggestions are intended to help improve resumes.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+📂 Project Structure
+resume-roaster/
+│
+├── client/          # Frontend
+├── server/          # Backend
+├── public/
+├── src/
+├── package.json
+└── README.md
 
-## What technologies are used for this project?
 
-This project is built with:
+🤝 Contributing
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Contributions are welcome.
 
-## How can I deploy this project?
+Fork the repository
+Create a new branch
+Commit your changes
+Push the branch
+Open a Pull Request
+📧 Contact
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Created by Paras Gupta
 
-## Can I connect a custom domain to my Lovable project?
+GitHub: paras-guptaji
+⭐ Support
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+If you liked this project, give it a star ⭐ on GitHub.
